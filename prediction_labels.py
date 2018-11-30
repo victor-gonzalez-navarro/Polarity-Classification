@@ -5,9 +5,10 @@ from sklearn import linear_model
 from scipy.stats import pearsonr
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn import svm
+from joblib import dump
 
-
-def prediction_labels(X_train, Y_train, X_test, Y_test,n_components_LDA, best_result, weights):
+def prediction_labels(X_train, Y_train, X_test, Y_test,n_components_LDA, best_result, weights, kernel, degree,
+                      epsilon,C):
 
     current_results = []
 
@@ -74,7 +75,7 @@ def prediction_labels(X_train, Y_train, X_test, Y_test,n_components_LDA, best_re
     # print(pearsonr(pred_3, Y_test)[0])
 
     # 5. SVR (Regression)-----------------------------------------------------------------------------------------------
-    regr_4 = svm.SVR()
+    regr_4 = svm.SVR(kernel = kernel, epsilon = epsilon, degree = degree, C=C)
 
     # Train the model using
     regr_4.fit(X_train, Y_train)
@@ -84,13 +85,19 @@ def prediction_labels(X_train, Y_train, X_test, Y_test,n_components_LDA, best_re
     # print('\nPearson Correlation using SVR:')
     current_results.append(pearsonr(pred_4, Y_test)[0])
     # print(pearsonr(pred_4, Y_test)[0])
+    filename = 'model/'+str(round(pearsonr(pred_4, Y_test)[0],4))+'.joblib'
 
     #-------------------------------------------------------------------------------------------------------------------
     if max(current_results)>best_result:
         best_result = max(current_results)
         print(best_result)
         print(weights)
+        print(kernel)
+        print(epsilon)
+        print(degree)
+        print(C)
         print(current_results.index(max(current_results)))
+        dump(regr_4, filename)
         print('--------------------------')
 
     return best_result
